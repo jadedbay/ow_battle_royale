@@ -8,34 +8,31 @@ rule "add ammo":
 
 rule "reload < max":
     @Event eachPlayer
-    @Condition eventPlayer.isHoldingButton(Button.RELOAD) and eventPlayer.getMaxAmmo(0) < 30
+    @Condition eventPlayer.isHoldingButton(Button.RELOAD) and eventPlayer.getMaxAmmo(0) < 30 and eventPlayer.getMaxAmmo(0) != 0
     eventPlayer.previous_max_ammo = eventPlayer.getMaxAmmo(0)
-    eventPlayer.setMaxAmmo(0, 31)
+    eventPlayer.setMaxAmmo(0, 30)
     eventPlayer.forceButtonPress(Button.RELOAD)
+    
 
 rule "get ammo before reload":
     @Event eachPlayer
     @Condition eventPlayer.isReloading()
+    if eventPlayer.getMaxAmmo(0) < 30 and eventPlayer.getMaxAmmo(0) != 0:
+        eventPlayer.previous_max_ammo = eventPlayer.getMaxAmmo(0)
     eventPlayer.previous_ammo = eventPlayer.getAmmo(0)
 
 rule "reload":
     @Event eachPlayer
     @Condition eventPlayer.getAmmo(0) > eventPlayer.previous_ammo
+    if eventPlayer.previous_max_ammo != 0:
+        eventPlayer.setMaxAmmo(0, eventPlayer.previous_max_ammo) 
+    if eventPlayer.getMaxAmmo(0) < 30:
+        if eventPlayer.getMaxAmmo(0) + eventPlayer.previous_ammo < 30:
+            eventPlayer.setAmmo(0, eventPlayer.getMaxAmmo(0) + eventPlayer.previous_ammo)
+        if eventPlayer.getMaxAmmo(0) + eventPlayer.previous_ammo >= 30:
+            eventPlayer.setAmmo(0, 30)
     if eventPlayer.getMaxAmmo(0) >= 30:
         eventPlayer.setAmmo(0, 30)
-        eventPlayer.setMaxAmmo(0, eventPlayer.getMaxAmmo(0) - (30 - eventPlayer.previous_ammo))
-    if eventPlayer.getMaxAmmo(0) < 30:
-        eventPlayer.setAmmo(0, eventPlayer.getMaxAmmo(0))
-        eventPlayer.setMaxAmmo(0, eventPlayer.previous_max_ammo - (30 - eventPlayer.previous_ammo))
-        eventPlayer.previous_max_ammo = 0
+    eventPlayer.setMaxAmmo(0, eventPlayer.getMaxAmmo(0) - (30 - eventPlayer.previous_ammo))
+    eventPlayer.previous_max_ammo = 0
     eventPlayer.previous_ammo = 100
-
-rule "disable reload":
-    @Event eachPlayer
-    if eventPlayer.getAmmo(0) == 30 or eventPlayer.getMaxAmmo(0) == 0:
-        eventPlayer.setReloadEnabled(false)
-
-rule "enable reload":
-    @Event eachPlayer
-    @Condition eventPlayer.getAmmo(0) < 30 and eventPlayer.getMaxAmmo(0) > 0
-    eventPlayer.setReloadEnabled(true)
