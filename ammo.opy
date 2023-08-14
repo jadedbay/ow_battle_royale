@@ -10,7 +10,7 @@ rule "reload < max":
     @Event eachPlayer
     @Condition eventPlayer.isHoldingButton(Button.RELOAD) and eventPlayer.getMaxAmmo(0) < 30 and eventPlayer.getMaxAmmo(0) != 0 and eventPlayer.getAmmo(0) < 30
     eventPlayer.previous_max_ammo = eventPlayer.getMaxAmmo(0)
-    eventPlayer.setMaxAmmo(0, 30)
+    eventPlayer.setMaxAmmo(0, 30) 
     eventPlayer.forceButtonPress(Button.RELOAD)
     
 
